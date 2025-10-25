@@ -1,0 +1,7 @@
+Default User Profile Image Requirements:
+
+Dimensions: 200x200 pixels
+Format: JPG or PNG (with transparency preferred)
+Description: A simple, modern user silhouette icon appropriate for default user profile pictures.
+
+This image will be used as the default profile picture for users who haven't uploaded their own photo. Please rename the file to "default.jpg" when adding it to this directory. 

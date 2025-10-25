@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="mb-3">Your Reading Statistics</h1>
+        <p class="lead">Track your reading progress and achievements over time.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 col-6 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-book-reader text-primary mb-3 icon-lg"></i>
+            <div class="stat-number">{{ stats.reading }}</div>
+            <div class="stat-label">Reading</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-clipboard-list text-success mb-3 icon-lg"></i>
+            <div class="stat-number">{{ stats.to_read }}</div>
+            <div class="stat-label">Want to Read</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-check-circle text-info mb-3 icon-lg"></i>
+            <div class="stat-number">{{ stats.read }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-book text-warning mb-3 icon-lg"></i>
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">Total Books</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Monthly Reading Activity ({{ monthly_stats[0].month }} - {{ monthly_stats[11].month }})</h3>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Recently Finished Books</h3>
+            </div>
+            <div class="card-body">
+                {% if recent_books %}
+                    <div class="list-group">
+                        {% for item in recent_books %}
+                            <a href="{{ url_for('books.view', book_id=item.book.id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ item.book.title }}</h5>
+                                    <p class="mb-1 text-muted">{{ item.book.authors }}</p>
+                                </div>
+                                <span class="badge bg-success">{{ item.date_finished.strftime('%b %d, %Y') }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-book fa-3x mb-3 text-secondary"></i>
+                        <h4>No books finished yet</h4>
+                        <p class="text-muted">Mark books as completed to see them here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Top Rated Books</h3>
+            </div>
+            <div class="card-body">
+                {% if top_rated %}
+                    <div class="list-group">
+                        {% for book in top_rated %}
+                            <a href="{{ url_for('books.view', book_id=book.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ book.title }}</h5>
+                                    <div class="stars-container">
+                                        {% for i in range(5) %}
+                                            {% if i < book.avg_rating|int %}
+                                                <i class="fas fa-star"></i>
+                                            {% elif i < book.avg_rating and i + 0.5 > book.avg_rating %}
+                                                <i class="fas fa-star-half-alt"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="mb-1 text-muted">{{ book.authors }}</p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-star fa-3x mb-3 text-secondary"></i>
+                        <h4>No rated books yet</h4>
+                        <p class="text-muted">Rate books to see them here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Active Challenges</h3>
+            </div>
+            <div class="card-body">
+                {% if challenges_data %}
+                    <div class="list-group">
+                        {% for item in challenges_data %}
+                            <a href="{{ url_for('challenges.view', challenge_id=item.challenge.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ item.challenge.title }}</h5>
+                                    <small>{{ item.days_left }} days left</small>
+                                </div>
+                                <div class="progress my-2">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ item.progress.percentage }}%" aria-valuenow="{{ item.progress.percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="d-flex w-100 justify-content-between">
+                                    <small>{{ item.progress.completed }}/{{ item.challenge.goal }} books</small>
+                                    <small>{{ item.progress.percentage }}% complete</small>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-trophy fa-3x mb-3 text-secondary"></i>
+                        <h4>No active challenges</h4>
+                        <p class="text-muted">Create a reading challenge to see it here.</p>
+                        <a href="{{ url_for('challenges.create_challenge') }}" class="btn btn-primary">Create Challenge</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Monthly Reading Chart
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        
+        const monthlyData = {
+            labels: [
+                {% for stat in monthly_stats %}
+                    '{{ stat.month }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Books Read',
+                data: [
+                    {% for stat in monthly_stats %}
+                        {{ stat.count }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1
+            }]
+        };
+        
+        const monthlyChart = new Chart(ctx, {
+            type: 'bar',
+            data: monthlyData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

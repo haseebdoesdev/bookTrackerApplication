@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-8 col-md-10 mx-auto">
+        <h1 class="mb-3">Add Book Manually</h1>
+        <p class="lead">Can't find the book you're looking for? Add it manually to your library.</p>
+        
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Book Details</h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label") }}
+                        {% if form.title.errors %}
+                            {{ form.title(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.title.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.title(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.authors.label(class="form-label") }}
+                        {% if form.authors.errors %}
+                            {{ form.authors(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.authors.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.authors(class="form-control", placeholder="Author names separated by commas") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {% if form.description.errors %}
+                            {{ form.description(class="form-control is-invalid", rows="5") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.description(class="form-control", rows="5") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.published_date.label(class="form-label") }}
+                            {% if form.published_date.errors %}
+                                {{ form.published_date(class="form-control is-invalid", placeholder="YYYY or YYYY-MM-DD") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.published_date.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.published_date(class="form-control", placeholder="YYYY or YYYY-MM-DD") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.categories.label(class="form-label") }}
+                            {% if form.categories.errors %}
+                                {{ form.categories(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.categories.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.categories(class="form-control", placeholder="Fiction, Mystery, etc.") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.page_count.label(class="form-label") }}
+                            {% if form.page_count.errors %}
+                                {{ form.page_count(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.page_count.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.page_count(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.avg_rating.label(class="form-label") }}
+                            {% if form.avg_rating.errors %}
+                                {{ form.avg_rating(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.avg_rating.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.avg_rating(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.cover_image.label(class="form-label") }}
+                        {% if form.cover_image.errors %}
+                            {{ form.cover_image(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.cover_image.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.cover_image(class="form-control", placeholder="https://example.com/image.jpg") }}
+                        {% endif %}
+                        <div class="form-text">Enter a URL to a cover image (optional)</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('books.search') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,7 @@
+Book Cover Placeholder Image Requirements:
+
+Dimensions: 400x600 pixels
+Format: JPG or PNG (with transparency preferred)
+Description: A simple placeholder image for book covers when no cover image is available from the API. This could be a generic book icon or a minimal design with a book silhouette.
+
+This image will be used as the fallback when a book doesn't have a cover image. Please rename the file to "book_placeholder.jpg" when adding it to this directory.

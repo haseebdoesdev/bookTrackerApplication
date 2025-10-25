@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-3">My Library</h1>
+        <p class="lead">Your personal collection of books.</p>
+    </div>
+    <div class="col-md-4 d-flex justify-content-end align-items-center">
+        <a href="{{ url_for('books.search') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i> Add Books
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-light">
+                <h4 class="mb-0">Filters</h4>
+            </div>
+            <div class="card-body">
+                <form id="filter-form" method="GET" action="{{ url_for('books.library') }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Reading Status</label>
+                            <select id="status" name="status" class="form-select">
+                                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                                <option value="want_to_read" {% if status_filter == 'want_to_read' %}selected{% endif %}>Want to Read</option>
+                                <option value="reading" {% if status_filter == 'reading' %}selected{% endif %}>Currently Reading</option>
+                                <option value="finished" {% if status_filter == 'finished' %}selected{% endif %}>Finished</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="category" class="form-label">Category</label>
+                            <select id="category" name="category" class="form-select">
+                                <option value="all" {% if category_filter == 'all' %}selected{% endif %}>All</option>
+                                {% for category in categories %}
+                                    <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>{{ category }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="rating" class="form-label">Minimum Rating</label>
+                            <select id="rating" name="rating" class="form-select">
+                                <option value="all" {% if rating_filter == 'all' %}selected{% endif %}>All</option>
+                                <option value="5" {% if rating_filter == '5' %}selected{% endif %}>5 Stars</option>
+                                <option value="4" {% if rating_filter == '4' %}selected{% endif %}>4+ Stars</option>
+                                <option value="3" {% if rating_filter == '3' %}selected{% endif %}>3+ Stars</option>
+                                <option value="2" {% if rating_filter == '2' %}selected{% endif %}>2+ Stars</option>
+                                <option value="1" {% if rating_filter == '1' %}selected{% endif %}>1+ Stars</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if library_data %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for item in library_data %}
+            <div class="col">
+                <div class="card book-card h-100">
+                    <div class="position-relative">
+                        {% if item.book.cover_image %}
+                            <img src="{{ item.book.cover_image }}" class="book-cover" alt="{{ item.book.title }}">
+                        {% else %}
+                            <div class="empty-cover">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        {% endif %}
+                        
+                        {% if item.progress.status == 'want_to_read' %}
+                            <span class="badge bg-secondary status-badge">Want to Read</span>
+                        {% elif item.progress.status == 'reading' %}
+                            <span class="badge bg-primary status-badge">Reading</span>
+                        {% elif item.progress.status == 'finished' %}
+                            <span class="badge bg-success status-badge">Finished</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.book.title }}</h5>
+                        <p class="card-text text-muted">{{ item.book.authors }}</p>
+                        
+                        {% if item.book.avg_rating %}
+                            <div class="stars-container mb-2">
+                                {% for i in range(5) %}
+                                    {% if i < item.book.avg_rating|int %}
+                                        <i class="fas fa-star"></i>
+                                    {% elif i < item.book.avg_rating and i + 0.5 > item.book.avg_rating %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-1 text-muted">({{ item.book.avg_rating }})</span>
+                            </div>
+                        {% endif %}
+                        
+                        {% if item.progress.status == 'reading' and item.progress.progress > 0 %}
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" style="width: {{ item.progress.progress }}%" aria-valuenow="{{ item.progress.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small>{{ item.progress.progress }}% complete</small>
+                                <small>{{ item.progress.progress_type }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-transparent text-center">
+                        <a href="{{ url_for('books.view', book_id=item.book.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-books fa-3x mb-3 text-secondary"></i>
+        <h3>Your library is empty</h3>
+        <p class="text-muted">Start by searching for books and adding them to your library.</p>
+        <a href="{{ url_for('books.search') }}" class="btn btn-primary">Find Books</a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filter-form');
+        const filterSelects = filterForm.querySelectorAll('select');
+        
+        filterSelects.forEach(function(select) {
+            select.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        });
+    });
+</script>
+{% endblock %} 

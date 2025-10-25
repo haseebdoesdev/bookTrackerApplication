@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('challenges.list_challenges') }}">Challenges</a></li>
+                <li class="breadcrumb-item active">{{ challenge.title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col-md-4 d-flex justify-content-end align-items-center">
+        {% if not challenge.completed %}
+            <a href="{{ url_for('challenges.edit', challenge_id=challenge.id) }}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-edit me-2"></i> Edit
+            </a>
+        {% endif %}
+        <form method="POST" action="{{ url_for('challenges.delete', challenge_id=challenge.id) }}" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this challenge? This action cannot be undone.')">
+                <i class="fas fa-trash-alt me-2"></i> Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-lg-4 col-md-5 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header {% if challenge.completed %}bg-success{% else %}bg-primary{% endif %} text-white">
+                <h3 class="mb-0">
+                    {{ challenge.title }}
+                    {% if challenge.completed %}
+                        <i class="fas fa-check-circle ms-2"></i>
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if challenge.description %}
+                    <p>{{ challenge.description }}</p>
+                    <hr>
+                {% endif %}
+                
+                <div class="challenge-info">
+                    <p><strong>Goal:</strong> Read {{ challenge.goal }} books</p>
+                    <p><strong>Start Date:</strong> {{ challenge.start_date.strftime('%B %d, %Y') }}</p>
+                    <p><strong>End Date:</strong> {{ challenge.end_date.strftime('%B %d, %Y') }}</p>
+                    
+                    {% if not challenge.completed and days_left > 0 %}
+                        <p><strong>Time Left:</strong> {{ days_left }} days</p>
+                    {% elif challenge.completed %}
+                        <p class="text-success"><strong>Status:</strong> Completed</p>
+                    {% else %}
+                        <p class="{% if progress.completed >= challenge.goal %}text-success{% else %}text-danger{% endif %}">
+                            <strong>Status:</strong> 
+                            {% if progress.completed >= challenge.goal %}
+                                Completed
+                            {% else %}
+                                Expired
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div class="progress-section mt-4">
+                    <h4>Progress</h4>
+                    <div class="text-center mb-2">
+                        <span class="display-4 fw-bold">{{ progress.completed }}</span>
+                        <span class="text-muted">/ {{ challenge.goal }}</span>
+                    </div>
+                    
+                    <div class="progress mb-2">
+                        <div class="progress-bar {% if challenge.completed %}bg-success{% endif %}" role="progressbar" style="width: {{ progress.percentage }}%" aria-valuenow="{{ progress.percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="text-center text-muted mb-3">
+                        {{ progress.percentage }}% Complete
+                    </div>
+                    
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ time_progress }}%" aria-valuenow="{{ time_progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="text-center text-muted">
+                        {{ time_progress }}% of time elapsed
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8 col-md-7">
+        <div class="card shadow h-100">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Books in this Challenge</h3>
+                <span class="badge bg-primary">{{ completed_books|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if completed_books %}
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for item in completed_books %}
+                            <div class="col">
+                                <div class="card h-100 book-card">
+                                    <div class="row g-0">
+                                        <div class="col-4">
+                                            {% if item.book.cover_image %}
+                                                <img src="{{ item.book.cover_image }}" class="img-fluid rounded-start h-100 w-100" style="object-fit: cover;" alt="{{ item.book.title }}">
+                                            {% else %}
+                                                <div class="empty-cover h-100 rounded-start">
+                                                    <i class="fas fa-book"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ item.book.title }}</h5>
+                                                <p class="card-text text-muted small">{{ item.book.authors }}</p>
+                                                <p class="card-text"><small class="text-muted">Added on {{ item.date_added.strftime('%b %d, %Y') }}</small></p>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <a href="{{ url_for('books.view', book_id=item.book.id) }}" class="btn btn-sm btn-outline-primary">View Book</a>
+                                                    <form method="POST" action="{{ url_for('challenges.remove_book', challenge_id=challenge.id, book_id=item.book.id) }}" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this book from the challenge?')">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-book fa-3x mb-3 text-secondary"></i>
+                        <h4>No books added yet</h4>
+                        <p class="text-muted">Mark books as completed to add them to this challenge.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if candidate_books %}
+                <div class="card-footer bg-light">
+                    <h4>Add Books to this Challenge</h4>
+                    <p class="text-muted">Books you've finished reading that aren't part of this challenge:</p>
+                    
+                    <div class="list-group">
+                        {% for book in candidate_books %}
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ book.title }}</h5>
+                                    <p class="mb-1 text-muted">{{ book.authors }}</p>
+                                </div>
+                                <form method="POST" action="{{ url_for('challenges.add_book', challenge_id=challenge.id, book_id=book.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus me-1"></i> Add
+                                    </button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

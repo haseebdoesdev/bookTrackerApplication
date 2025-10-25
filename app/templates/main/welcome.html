@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="welcome-section">
+    <div class="welcome-content">
+        <h1 class="welcome-title">Track Your Reading Journey</h1>
+        <p class="welcome-subtitle">BookTracker helps you organize your books, track your progress, and set reading goals.</p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 me-md-2">Sign Up</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">Login</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="text-center mb-5">Experience the Joy of Reading</h2>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-search icon-lg mb-3 text-primary"></i>
+                <h3>Find Books</h3>
+                <p>Search for books using the Google Books API or add books manually to build your personal library.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-book-reader icon-lg mb-3 text-primary"></i>
+                <h3>Track Progress</h3>
+                <p>Keep track of what you're reading, want to read, and have finished. Update your progress as you go.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-trophy icon-lg mb-3 text-primary"></i>
+                <h3>Challenge Yourself</h3>
+                <p>Set reading goals and challenge yourself to read more books in a specific timeframe.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mt-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-star icon-lg mb-3 text-primary"></i>
+                <h3>Rate & Review</h3>
+                <p>Share your thoughts on books you've read with ratings and in-depth reviews using Markdown formatting.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-chart-line icon-lg mb-3 text-primary"></i>
+                <h3>Visualize Stats</h3>
+                <p>See your reading habits and achievements through intuitive statistics and progress visualizations.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-mobile-alt icon-lg mb-3 text-primary"></i>
+                <h3>Mobile Friendly</h3>
+                <p>Access your library and track your reading on any device with our responsive design.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-5">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">Get Started</a>
+        <p class="text-muted mt-4">BookTracker &copy; 2025 - Created by Amine</p>
+    </div>
+</div>
+{% endblock %} 

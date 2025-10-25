@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-3">Search Books</h1>
+        <p class="lead">Search for books using the Google Books API or <a href="{{ url_for('books.add_manual') }}">add a book manually</a>.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('books.search') }}" class="row g-3">
+                    {{ form.hidden_tag() }}
+                    <div class="col-9 col-md-10">
+                        {{ form.query(class="form-control form-control-lg", placeholder="Search by title, author, or ISBN...") }}
+                    </div>
+                    <div class="col-3 col-md-2">
+                        {{ form.submit(class="btn btn-primary btn-lg w-100") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h2>Search Results</h2>
+            <p class="text-muted">Results are sorted by relevance to your search query.</p>
+        </div>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        {% for book in results %}
+            <div class="col">
+                <div class="card book-card h-100 {% if loop.index <= 3 %}border-primary{% endif %}">
+                    {% if book.cover_image %}
+                        <img src="{{ book.cover_image }}" class="book-cover" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="empty-cover">
+                            <i class="fas fa-book"></i>
+                        </div>
+                    {% endif %}
+                    
+                    {% if loop.index <= 3 %}
+                    <div class="position-absolute top-0 end-0 p-2">
+                        <span class="badge bg-primary">Top Match</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <p class="card-text text-muted">
+                            {% if book.authors %}
+                                {% if book.authors is string %}
+                                    {{ book.authors }}
+                                {% else %}
+                                    {{ book.authors|join(', ') }}
+                                {% endif %}
+                            {% else %}
+                                Unknown Author
+                            {% endif %}
+                        </p>
+                        
+                        {% if book.rating %}
+                            <div class="stars-container mb-2">
+                                {% for i in range(5) %}
+                                    {% if i < book.rating|int %}
+                                        <i class="fas fa-star"></i>
+                                    {% elif i < book.rating and i + 0.5 > book.rating %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-1 text-muted">({{ book.rating }})</span>
+                            </div>
+                        {% endif %}
+                        
+                        {% if book.published_date %}
+                            <p class="card-text"><small class="text-muted">Published: {{ book.published_date }}</small></p>
+                        {% endif %}
+                        
+                        {% if book.description %}
+                            <p class="card-text">{{ book.description|striptags|truncate(150) }}</p>
+                        {% endif %}
+                        
+                        <div class="progress mb-2" title="Relevance Score: {{ book.relevance_score|round(1) }}">
+                            <div class="progress-bar bg-success" 
+                                 role="progressbar" 
+                                 data-progress="{{ book.relevance_score|round(0)|int }}"
+                                 aria-valuenow="{{ book.relevance_score|round(1) }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <small class="text-muted">Relevance: {{ book.relevance_score|round(1) }}%</small>
+                    </div>
+                    <div class="card-footer bg-transparent text-center">
+                        <a href="{{ url_for('books.add_from_api', google_id=book.id) }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add to Library
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% elif request.method == 'POST' %}
+    <div class="text-center py-5">
+        <i class="fas fa-search fa-3x mb-3 text-secondary"></i>
+        <h3>No books found</h3>
+        <p class="text-muted">Try a different search term or <a href="{{ url_for('books.add_manual') }}">add a book manually</a>.</p>
+    </div>
+{% endif %}
+{% endblock %} 
