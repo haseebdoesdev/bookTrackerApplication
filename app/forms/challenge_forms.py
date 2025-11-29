@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, IntegerField, DateField
-from wtforms.validators import DataRequired, NumberRange, Optional, Length
+from wtforms.validators import DataRequired, NumberRange, Optional, Length, ValidationError
 from datetime import datetime, timedelta
 
 class CreateChallengeForm(FlaskForm):
@@ -12,7 +12,7 @@ class CreateChallengeForm(FlaskForm):
     
     def validate_end_date(self, end_date):
         if end_date.data <= datetime.now().date():
-            raise ValueError('End date must be in the future.')
+            raise ValidationError('End date must be in the future.')
             
 class UpdateChallengeForm(FlaskForm):
     title = StringField('Challenge Title', validators=[DataRequired(), Length(max=100)])

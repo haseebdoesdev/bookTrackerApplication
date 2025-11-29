@@ -1,6 +1,11 @@
 from datetime import datetime
 from app import db
 from markupsafe import Markup
+import bleach
+
+# Allowed HTML tags for sanitization
+ALLOWED_TAGS = ['p', 'br', 'b', 'i', 'em', 'strong', 'ul', 'ol', 'li', 'span']
+ALLOWED_ATTRIBUTES = {}
 
 class Book(db.Model):
     __tablename__ = 'books'
@@ -35,10 +40,17 @@ class Book(db.Model):
         return round(total_rating / len(reviews), 1)
     
     def get_formatted_description(self):
-        """Safely render HTML content from book description"""
+        """Safely render HTML content from book description with XSS protection"""
         if not self.description:
             return ""
-        return Markup(self.description)
+        # Sanitize HTML to prevent XSS attacks
+        cleaned = bleach.clean(
+            self.description, 
+            tags=ALLOWED_TAGS, 
+            attributes=ALLOWED_ATTRIBUTES, 
+            strip=True
+        )
+        return Markup(cleaned)
     
     def to_dict(self):
         return {

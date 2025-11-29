@@ -74,11 +74,11 @@ def view(challenge_id):
     challenge = Challenge.query.filter_by(id=challenge_id, user_id=current_user.id).first_or_404()
     progress = challenge.get_progress()
     
-    days_total = (challenge.end_date - challenge.start_date).days
+    days_total = max(1, (challenge.end_date - challenge.start_date).days)
     days_passed = (datetime.utcnow() - challenge.start_date).days
     days_left = (challenge.end_date - datetime.utcnow()).days
     
-    time_progress = min(100, int((days_passed / days_total) * 100)) if days_total > 0 else 0
+    time_progress = min(100, int((days_passed / days_total) * 100))
     
     # Get completed books for this challenge
     completed_books = []

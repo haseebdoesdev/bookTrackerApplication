@@ -1,6 +1,16 @@
 from datetime import datetime
 import markdown
+import bleach
 from app import db
+
+# Allowed HTML tags for markdown output sanitization
+ALLOWED_TAGS = [
+    'p', 'br', 'b', 'i', 'em', 'strong', 'ul', 'ol', 'li', 
+    'a', 'code', 'pre', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+]
+ALLOWED_ATTRIBUTES = {
+    'a': ['href', 'title'],
+}
 
 class Review(db.Model):
     __tablename__ = 'reviews'
@@ -17,7 +27,16 @@ class Review(db.Model):
         return f"Review(Book ID: {self.book_id}, Rating: {self.rating})"
     
     def get_formatted_review(self):
-        """Convert Markdown to HTML for display"""
+        """Convert Markdown to HTML for display with XSS protection"""
         if not self.review_text:
             return ""
-        return markdown.markdown(self.review_text) 
+        # Convert markdown to HTML
+        html = markdown.markdown(self.review_text)
+        # Sanitize HTML to prevent XSS attacks
+        cleaned = bleach.clean(
+            html, 
+            tags=ALLOWED_TAGS, 
+            attributes=ALLOWED_ATTRIBUTES, 
+            strip=True
+        )
+        return cleaned 

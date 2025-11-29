@@ -3,7 +3,7 @@ import requests
 from flask import Blueprint, render_template, url_for, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from app import db
-from app.models import Book, ReadingProgress, Review
+from app.models import Book, ReadingProgress, Review, ChallengeBook
 from app.forms import BookSearchForm, ManualBookAddForm, ReadingProgressForm, ReviewForm
 from fuzzywuzzy import fuzz
 
@@ -14,8 +14,11 @@ def search_google_books(query):
     api_key = os.environ.get('GOOGLE_BOOKS_API_KEY', '')
     url = f"https://www.googleapis.com/books/v1/volumes?q={query}&key={api_key}&maxResults=40"
     
-    response = requests.get(url)
-    if response.status_code != 200:
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            return []
+    except requests.exceptions.RequestException:
         return []
     
     data = response.json()
@@ -136,9 +139,13 @@ def add_from_api(google_id):
     api_key = os.environ.get('GOOGLE_BOOKS_API_KEY', '')
     url = f"https://www.googleapis.com/books/v1/volumes/{google_id}?key={api_key}"
     
-    response = requests.get(url)
-    if response.status_code != 200:
-        flash('Error fetching book details.', 'danger')
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            flash('Error fetching book details.', 'danger')
+            return redirect(url_for('books.search'))
+    except requests.exceptions.RequestException:
+        flash('Network error while fetching book details. Please try again.', 'danger')
         return redirect(url_for('books.search'))
     
     data = response.json()
@@ -305,6 +312,7 @@ def delete(book_id):
     # Delete associated records
     ReadingProgress.query.filter_by(book_id=book_id).delete()
     Review.query.filter_by(book_id=book_id).delete()
+    ChallengeBook.query.filter_by(book_id=book_id).delete()
     
     db.session.delete(book)
     db.session.commit()

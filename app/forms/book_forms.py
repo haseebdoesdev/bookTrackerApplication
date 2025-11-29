@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, SelectField, IntegerField, FloatField
-from wtforms.validators import DataRequired, Length, NumberRange, Optional
+from wtforms.validators import DataRequired, Length, NumberRange, Optional, ValidationError
 
 class BookSearchForm(FlaskForm):
     query = StringField('Search Books', validators=[DataRequired()])
@@ -25,7 +25,7 @@ class ReadingProgressForm(FlaskForm):
                             ('finished', 'Finished Reading')
                         ],
                         validators=[DataRequired()])
-    progress = IntegerField('Progress', validators=[Optional(), NumberRange(min=0, max=100)])
+    progress = IntegerField('Progress', validators=[Optional(), NumberRange(min=0)])
     progress_type = SelectField('Progress Type',
                               choices=[
                                   ('percentage', 'Percentage'),
@@ -33,6 +33,12 @@ class ReadingProgressForm(FlaskForm):
                               ], 
                               validators=[Optional()])
     submit = SubmitField('Update Progress')
+    
+    def validate_progress(self, progress):
+        """Validate progress based on progress type"""
+        if progress.data is not None and self.progress_type.data == 'percentage':
+            if progress.data > 100:
+                raise ValidationError('Percentage cannot exceed 100.')
 
 class ReviewForm(FlaskForm):
     rating = IntegerField('Rating (1-5)', validators=[DataRequired(), NumberRange(min=1, max=5)])

@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
+from urllib.parse import urlparse
 from app import db, bcrypt
 from app.models import User
 from app.forms import RegistrationForm, LoginForm, UpdateAccountForm, ChangePasswordForm
@@ -37,7 +38,10 @@ def login():
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
             flash('Login successful!', 'success')
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))
+            # Security: Only allow relative URLs to prevent open redirect attacks
+            if next_page and urlparse(next_page).netloc == '':
+                return redirect(next_page)
+            return redirect(url_for('main.home'))
         else:
             flash('Login unsuccessful. Please check email and password.', 'danger')
     
