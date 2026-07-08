@@ -2,7 +2,6 @@ Flask==2.3.3
 Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
 Flask-WTF==1.2.1
-mysql-connector-python==8.1.0
 flask-bcrypt==1.0.1
 python-dotenv==1.0.0
 requests==2.31.0
@@ -10,8 +9,8 @@ markdown==3.5
 Werkzeug==2.3.7
 email-validator==2.0.0
 wtforms==3.0.1
-PyMySQL==1.1.0
 python-dateutil==2.8.2
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.25.1
-bleach==6.1.0 
+bleach==6.1.0
+psycopg2-binary==2.9.9
