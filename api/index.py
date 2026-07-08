@@ -1,12 +1,16 @@
 import os
 import sys
+import traceback
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# On Vercel, /tmp is the only writable directory; use it for SQLite unless a real DB URI is set
 if not os.environ.get('SQLALCHEMY_DATABASE_URI'):
     os.environ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/booktracker.db'
 
-from app import create_app
-
-app = create_app()
+try:
+    from app import create_app
+    app = create_app()
+except Exception as e:
+    print(f"[STARTUP ERROR] {e}", flush=True)
+    traceback.print_exc()
+    raise
